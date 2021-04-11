@@ -24,7 +24,7 @@ Icinga is Nagios forked monitoring tool. This repository contains script written
 ### Example
 ```
    check-service-by-name.ps1  
-    -s <YOUR_SERVICE>  
+    -s Chrome  
     -cpu_warn 10  
     -cpu_crit 20  
     -mem_warn 10  
