@@ -1,7 +1,7 @@
-# Icinga-scripts
+# Icinga check service by name plugin
 <a href="https://icinga.com/"><img src="https://warlord0blog.files.wordpress.com/2020/06/icinga2_logo.png?w=712" width="1000"/></a>
 
-Icinga is Nagios forked monitoring tool. This repository contains scripts in Powershell for Windows and in bash for Unix based OS
+Icinga is Nagios forked monitoring tool. This repository contains script written in Powershell for monitoring specified Windows process
 
 
 
