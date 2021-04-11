@@ -104,10 +104,10 @@ apply Service "service" {
   enable_notifications = false
 
   vars.ps_check_service_by_name_name = "service name"
-  vars.ps_check_service_cpu_warn = 10
-  vars.ps_check_service_cpu_crit = 20
-  vars.ps_check_service_mem_warn = 10
-  vars.ps_check_service_mem_crit = 20
+  vars.ps_check_service_by_name_cpu_warn = 10
+  vars.ps_check_service_by_name_cpu_crit = 20
+  vars.ps_check_service_by_name_mem_warn = 10
+  vars.ps_check_service_by_name_mem_crit = 20
   vars.ps_check_service_by_name_mem_warn_MB = 2000
   vars.ps_check_service_by_name_mem_crit_MB = 4000
 
