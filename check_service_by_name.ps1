@@ -74,7 +74,7 @@ function get_mem_of_service() {
     # In case of no output return error code
     if (-not $services_in_manager) { return -1 }
 
-    for ($service_CSV = $($services_in_manager.Count - 2); $service_CSV -lt $services_in_manager.Count; $service_CSV+=2) {
+    for ($service_CSV=9; $service_CSV -lt $services_in_manager.Count; $service_CSV+=11) {
         $line = $services_in_manager[$service_CSV] -replace '[K]',''
         $memory = [double]::Parse($line)                                                                    # Used memory by service in kB
         $used_memory += $memory
