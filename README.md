@@ -22,7 +22,7 @@ Icinga is Nagios forked monitoring tool. This repository contains script written
 ### Description
    The script checks CPU and RAM usage by the service which name is given as the parameter
 ### Example
-```
+```powershell
    check-service-by-name.ps1  
     -s Chrome  
     -cpu_warn 10  
@@ -39,7 +39,7 @@ Only service name parameter is required. If threshold parameters are not specifi
 # Icinga2 configuration
 
 ### Command
-```
+```powershell
 object CheckCommand "ps-check-service-by-name" {
         command = [ "C:\\Windows\\system32\\WindowsPowerShell\\v1.0\\powershell.exe" ]
 
@@ -95,7 +95,7 @@ object CheckCommand "ps-check-service-by-name" {
 
 ### Service
 
-```
+```powershell
 apply Service "service" {
   import "generic-service"
 
