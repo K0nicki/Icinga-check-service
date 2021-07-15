@@ -21,7 +21,9 @@ param (
     [Parameter()][double]$mem_warn,
     [Parameter()][double]$mem_crit,
     [Parameter()][double]$mem_warn_bytes,
-    [Parameter()][double]$mem_crit_bytes
+    [Parameter()][double]$mem_crit_bytes,
+    [Parameter()][switch]$reverse,
+    [Parameter()][switch]$help
 )
 
 $EXIT_CODE=0
@@ -32,15 +34,22 @@ $SCRIPT_NAME = $MyInvocation.MyCommand.Name
 $ERR_MESSAGE = ""               # Error message
 
 function help() {
-    Write-Host "
-Script display memory usage of given service
+    Write-Output "Script display memory usage of given service
 Usage: $SCRIPT_NAME -service <service_name> [OPTIONS]
     
 -service                                Image service name from tasklist powershell command without 'exe' suffix
 -cpu_warn, mem_warn                     Warning threshold in %
 -cpu_crit, mem_crit                     Critical threshold in %
 -mem_warn_bytes, mem_crit_bytes         As above but in MB (additional limitation)
+-reverse                                Alert when process utilization is lower then the given threshold 
 "
+}
+
+function help_needed {
+    if ($help) {
+        help
+        exit 0
+    }
 }
 
 # Return total physical memory in Bytes
@@ -56,7 +65,7 @@ function get_total_cpu {
     )
     $total = [double]::Parse(0)
     $NumberOfLogicalProcessors=(Get-WmiObject -class Win32_processor | Measure-Object -Sum NumberOfLogicalProcessors).Sum
-    $cpu_values = (Get-Counter "\Process($f_service*)\% Processor Time").CounterSamples.CookedValue
+    $cpu_values = (Get-Counter "\Process($f_service*)\% Processor Time").CounterSamples.CookedValue 2>$null
     
     for ($val = 0; $val -lt $cpu_values.Count; $val++) {
         $total += $cpu_values[$val]
@@ -97,13 +106,21 @@ function check_status_memory() {
 
     # Convert mem (MB) to %
     $f_mem_percent = $f_mem * 100 / $f_total_mem
-
-    if ( (($f_warn) -and ($f_mem_percent -ge $f_warn) -and ($f_mem_percent -lt $f_crit)) -or ( ($f_warn_bytes) -and ($f_mem -ge $f_warn_bytes) -and ($f_mem -lt $f_crit_bytes)) ) {
-        return 1
-    } elseif ( (($f_crit) -and ($f_mem_percent -ge $f_crit)) -or ( ($f_crit_bytes) -and ($f_mem -ge $f_crit_bytes) ) ) {
-        return 2
+    if (!$reverse) {
+        if ( ((0 -ne $f_warn) -and ($f_mem_percent -ge $f_warn) -and ($f_mem_percent -lt $f_crit)) -or ( ($f_warn_bytes) -and ($f_mem -ge $f_warn_bytes) -and ($f_mem -lt $f_crit_bytes)) ) {
+            return 1
+        } elseif ( ($f_mem_percent -ge $f_crit) -or ( ($f_crit_bytes) -and ($f_mem -ge $f_crit_bytes) ) ) {
+            return 2
+        }
+        return 0
+    } else {
+        if ( ((100 -ne $f_warn) -and ($f_mem_percent -le $f_warn) -and ($f_mem_percent -gt $f_crit)) -or ( ($f_warn_bytes) -and ($f_mem -le $f_warn_bytes) -and ($f_mem -gt $f_crit_bytes)) ) {
+            return 1
+        } elseif ( ($f_mem_percent -le $f_crit) -or ( ($f_crit_bytes) -and ($f_mem -le $f_crit_bytes) ) ) {
+            return 2
+        }
+        return 0
     }
-    return 0
 }
 
 # Operations in % scale
@@ -113,12 +130,21 @@ function check_status_cpu {
         $f_warn,
         $f_crit
     )
-    if ( ($f_warn) -and ($f_cpu_in_percent -ge $f_warn) -and ($f_cpu_in_percent -lt $f_crit) ) {
-        return 1
-    } elseif ( ($f_crit) -and ($f_cpu_in_percent -ge $f_crit) ) {
-        return 2
+    if (!$reverse) {
+        if ( (0 -ne $f_warn) -and ($f_cpu_in_percent -ge $f_warn) -and ($f_cpu_in_percent -lt $f_crit) ) {
+            return 1
+        } elseif ($f_cpu_in_percent -ge $f_crit) {
+            return 2
+        }
+        return 0
+    } else {
+        if ( (100 -ne $f_warn) -and ($f_cpu_in_percent -le $f_warn) -and ($f_cpu_in_percent -gt $f_crit) ) {
+            return 1
+        } elseif ($f_cpu_in_percent -le $f_crit) {
+            return 2
+        }
+        return 0
     }
-    return 0
 }
 
 function check_status {
@@ -134,8 +160,11 @@ function check_status {
 $mem_crit_bytes *= (1000*1000)
 $mem_warn_bytes *= (1000*1000)
 
+# Check if you want to see help message
+help_needed
+
 # Main loop
-If ($service) {
+If ($service) {    
     $USED_MEMORY = get_mem_of_service
     $TOTAL_MEMORY = get_total_memory
     $USED_CPU = get_total_cpu $service
@@ -152,6 +181,7 @@ If ($service) {
     $ERR_MESSAGE = help
     $EXIT_CODE = 3
 }
+
 
 # Exit code for Icinga with message
 switch ($EXIT_CODE) {
