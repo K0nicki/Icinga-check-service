@@ -33,7 +33,8 @@ Icinga is Nagios forked monitoring tool. This repository contains script written
     -mem_crit_bytes 4000
 ```
 
-Only service name parameter is required. If threshold parameters are not specified, script will always quit with OK status
+Only service name parameter is required.
+The reverse flag allows monitoring processes that should not consume less resources than a given threshold
 
 
 # Icinga2 configuration
@@ -76,6 +77,9 @@ object CheckCommand "ps-check-service-by-name" {
                 set_if = "$ps_check_service_mem_crit_bytes$"
                 value = "$ps_check_service_mem_crit_bytes$"
         }
+        "-reverse" = {
+                set_if = "$ps_check_service_reverse$"
+        }
         ";exit" = {
                 value = "$$LastExitCode"
                 }
@@ -89,6 +93,7 @@ object CheckCommand "ps-check-service-by-name" {
         vars.ps_check_service_cpu_crit = "$ps_check_service_by_name_cpu_crit$"
         vars.ps_check_service_mem_warn_bytes = "$ps_check_service_by_name_mem_warn_MB$"
         vars.ps_check_service_mem_crit_bytes = "$ps_check_service_by_name_mem_crit_MB$"
+        vars.ps_check_service_reverse = "$ps_check_service_reverse$"
 }
 
 ```
