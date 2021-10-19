@@ -247,8 +247,9 @@ assign where host.address
 
 ---
 
+
 ## Visualization
-<img  src="https://github.com/K0nicki/Icinga-check-service/blob/master/img/serviceExampleImg.png"  width="1000"/>
+<img  src="https://github.com/K0nicki/Icinga-check-service/blob/main/img/serviceExampleImg.png"  width="1000"/>
 
   
 
